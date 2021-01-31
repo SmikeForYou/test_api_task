@@ -1,0 +1,47 @@
+version: "3.2"
+
+services:
+  social: &app
+    container_name: social
+    tty: true
+    build:
+      context: social
+      args:
+        requirements: requirements/development.txt
+    environment:
+      - DJANGO_SETTINGS_MODULE=social.settings.development
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_PORT=$POSTGRES_PORT
+      - POSTGRES_HOST=$POSTGRES_HOST
+    restart: always
+    volumes:
+      - ./social:/app:delegated
+      - static-django:/app/static:delegated
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - ${APP_PORT}:8080
+    command: make _dev 
+
+  postgres:
+    image: postgres:12
+    container_name: social_postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+  redis:
+    image: redis:6
+    container_name: social_redis
+    ports:
+      - ${REDIS_PORT}:6379
+
+volumes: 
+  static-django:

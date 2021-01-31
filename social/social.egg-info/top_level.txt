@@ -1,0 +1,5 @@
+auth
+core
+post
+social
+user
